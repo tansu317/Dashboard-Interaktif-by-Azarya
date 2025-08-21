@@ -1,0 +1,18 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "kode_pro": "11", "nama": "Aceh" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[95.293, 5.548], [95.333, 5.567], [95.365, 5.532], [95.293, 5.548]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "kode_pro": "12", "nama": "Sumatera Utara" },
+      "geometry": { "type": "Polygon", "coordinates": null }
+    }
+  ]
+}
