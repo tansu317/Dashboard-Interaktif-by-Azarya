@@ -1,4 +1,4 @@
-import AnggaranPieChart from "./AnggaranPieChart";
+import { FC } from "react";
 
 type ProvinsiData = {
   kode_pro: string;
@@ -17,97 +17,42 @@ type ProvinsiData = {
 const formatRupiah = (num: number) =>
   new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" }).format(num);
 
-const ProvinsiView = ({ provinsi, data }: { provinsi: string; data: ProvinsiData }) => {
+const ProvinsiView: FC<{ provinsi: string; data: ProvinsiData }> = ({ provinsi, data }) => {
+  const items = [
+    { label: "Total Revitalisasi Sekolah", value: data.total_sekolah.toLocaleString("id-ID") },
+    { label: "Total Anggaran Revitalisasi", value: formatRupiah(data.total_anggaran) },
+    { label: "Revitalisasi Sekolah PAUD", value: data.total_paud.toLocaleString("id-ID") },
+    { label: "Anggaran Revitalisasi PAUD", value: formatRupiah(data.total_anggaran_paud) },
+    { label: "Revitalisasi Sekolah SD", value: data.total_sd.toLocaleString("id-ID") },
+    { label: "Anggaran Revitalisasi SD", value: formatRupiah(data.total_anggaran_sd) },
+    { label: "Revitalisasi Sekolah SMP", value: data.total_smp.toLocaleString("id-ID") },
+    { label: "Anggaran Revitalisasi SMP", value: formatRupiah(data.total_anggaran_smp) },
+    { label: "Revitalisasi Sekolah SMA", value: data.total_sma.toLocaleString("id-ID") },
+    { label: "Anggaran Revitalisasi SMA", value: formatRupiah(data.total_anggaran_sma) },
+  ];
+
   return (
     <div className="container my-4">
-      <h4 className="mb-4 fw-bold text-center">
+      <h4 className="mb-5 fw-bold text-center">
         Data Revitalisasi di Provinsi {provinsi}
       </h4>
 
       {/* Card Grid */}
       <div className="row g-3">
-        {/* Total Sekolah */}
-        <div className="col-md-6">
-          <div className="card shadow-sm h-100">
-            <div className="card-body text-center">
-              <p className="text-muted small mb-1">Total Revitalisasi Sekolah</p>
-              <h5 className="fw-bold">
-                {data.total_sekolah.toLocaleString("id-ID")}
-              </h5>
+        {items.map((item, idx) => (
+          <div className="col-md-6" key={idx}>
+            <div className="card shadow-sm h-100">
+              <div className="card-body text-center">
+                <p className="text-muted small mb-1">{item.label}</p>
+                <h5 className="fw-bold">{item.value}</h5>
+                {item.sub && (
+                  <p className="text-muted small mb-0">{item.sub}</p>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-
-        {/* Total Anggaran */}
-        <div className="col-md-6">
-          <div className="card shadow-sm h-100">
-            <div className="card-body text-center">
-              <p className="text-muted small mb-1">Total Anggaran Revitalisasi</p>
-              <h5 className="fw-bold">{formatRupiah(data.total_anggaran)}</h5>
-            </div>
-          </div>
-        </div>
-
-        {/* PAUD */}
-        <div className="col-md-6">
-          <div className="card shadow-sm h-100">
-            <div className="card-body text-center">
-              <p className="text-muted small mb-1">PAUD</p>
-              <h5 className="fw-bold">{data.total_paud.toLocaleString("id-ID")} sekolah</h5>
-              <p className="text-muted small mb-0">
-                {formatRupiah(data.total_anggaran_paud)}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* SD */}
-        <div className="col-md-6">
-          <div className="card shadow-sm h-100">
-            <div className="card-body text-center">
-              <p className="text-muted small mb-1">SD</p>
-              <h5 className="fw-bold">{data.total_sd.toLocaleString("id-ID")} sekolah</h5>
-              <p className="text-muted small mb-0">
-                {formatRupiah(data.total_anggaran_sd)}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* SMP */}
-        <div className="col-md-6">
-          <div className="card shadow-sm h-100">
-            <div className="card-body text-center">
-              <p className="text-muted small mb-1">SMP</p>
-              <h5 className="fw-bold">{data.total_smp.toLocaleString("id-ID")} sekolah</h5>
-              <p className="text-muted small mb-0">
-                {formatRupiah(data.total_anggaran_smp)}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* SMA */}
-        <div className="col-md-6">
-          <div className="card shadow-sm h-100">
-            <div className="card-body text-center">
-              <p className="text-muted small mb-1">SMA</p>
-              <h5 className="fw-bold">{data.total_sma.toLocaleString("id-ID")} sekolah</h5>
-              <p className="text-muted small mb-0">
-                {formatRupiah(data.total_anggaran_sma)}
-              </p>
-            </div>
-          </div>
-        </div>
+        ))}
       </div>
-
-      {/* Chart Pie */}
-      {/* <div className="mt-5">
-        <h4 className="text-center mb-3">
-          Anggaran Revitalisasi Sekolah Berdasarkan Bentuk Pendidikan Provinsi {provinsi}
-        </h4>
-        <AnggaranPieChart data={data} />
-      </div> */}
     </div>
   );
 };

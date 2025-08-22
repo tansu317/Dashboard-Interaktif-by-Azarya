@@ -1,6 +1,4 @@
 import { useEffect, useState } from "react";
-import AnggaranPieChart from "./AnggaranPieChart";
-import RevitalisasiBarLineChart from "./RevitalisasiBarLineChartProv";
 
 type NasionalData = {
   total_paud: number;
