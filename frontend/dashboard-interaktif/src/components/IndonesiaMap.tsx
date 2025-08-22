@@ -1,10 +1,16 @@
-import { MapContainer, TileLayer, GeoJSON } from 'react-leaflet';
-import indonesiaGeoJson from '../data/38 Provinsi Indonesia - Provinsi.json';
-import { useState, useEffect } from 'react';
+import { MapContainer, TileLayer, GeoJSON } from "react-leaflet";
+import indonesiaGeoJson from "../data/38 Provinsi Indonesia - Provinsi.json";
+import { useState, useEffect } from "react";
 import "leaflet/dist/leaflet.css";
 import NasionalView from "../components/NasionalView";
 import ProvinsiView from "../components/ProvinsiView";
-import ProvinsiTableView from './ProvinsiTableView';
+import ProvinsiTableView from "./ProvinsiTableView";
+import NasionalTableView from "./NasionalTableView";
+import AnggaranPieChart from "./AnggaranPieChart";
+import { Container, Row, Col, Card } from "react-bootstrap";
+import "bootstrap/dist/css/bootstrap.min.css";
+import RevitalisasiBarLineChartProv from "./RevitalisasiBarLineChartProv";
+import RevitalisasiBarLineChartKab from "./RevitalisasiBarLineChartKab";
 
 const IndonesiaMap = () => {
   const [selectedProvince, setSelectedProvince] = useState<string | null>(null);
@@ -12,7 +18,6 @@ const IndonesiaMap = () => {
   const [nasionalData, setNasionalData] = useState<any>(null);
   const [provinsiData, setProvinsiData] = useState<any>(null);
 
-  // Fetch data nasional ketika komponen pertama kali load
   useEffect(() => {
     const fetchNasional = async () => {
       try {
@@ -26,12 +31,13 @@ const IndonesiaMap = () => {
     fetchNasional();
   }, []);
 
-  // Fetch data provinsi ketika provinsi dipilih
   useEffect(() => {
     if (!selectedKodeProv) return;
     const fetchProvinsi = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/provinsi/${selectedKodeProv}`);
+        const res = await fetch(
+          `http://localhost:5000/api/provinsi/${selectedKodeProv}`
+        );
         const data = await res.json();
         setProvinsiData(data);
       } catch (err) {
@@ -51,52 +57,148 @@ const IndonesiaMap = () => {
   };
 
   return (
-    <div className="flex flex-col w-full h-screen">
-        <h3>Project Pembuatan Dashboard Interaktif (Typescript React - Node JS)</h3>
-        <h4>oleh: Azarya Kairossutan Sacri Pusaka Dami | sutandami@gmail.com | https://www.linkedin/in/azarya-dami</h4>
-        {/* Map Area */}
-        <div className="flex justify-center p-4">
-            <h1>Revitalisasi Sarana Belajar Mengajar</h1>
-            <h2>Persebaran Program Revitalisasi Sekolah Nasional</h2>
-            <MapContainer
-            center={[-2.5, 120]}
-            zoom={3.5}
-            minZoom={4}
-            maxZoom={8}
-            scrollWheelZoom={false}
-            style={{ width: "1000px", height: "400px" }}
+    <Container fluid className="py-4">
+      {/* Header */}
+      <Row className="mb-3 text-center">
+        <Col>
+          <h3>Project Pembuatan Dashboard Interaktif (Typescript React - Node JS)</h3>
+          <h5>
+            oleh: Azarya Kairossutan Sacri Pusaka Dami |{" "}
+            <a href="mailto:sutandami@gmail.com">sutandami@gmail.com</a> |{" "}
+            <a
+              href="https://www.linkedin.com/in/azarya-dami"
+              target="_blank"
+              rel="noopener noreferrer"
             >
-            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-            <GeoJSON data={indonesiaGeoJson as any} onEachFeature={onEachFeature} />
-            </MapContainer>
-        </div>
+              LinkedIn
+            </a>
+          </h5>
+        </Col>
+      </Row>
 
-        {/* Sidebar (Provinsi / Nasional Info) */}
-        <div className="p-4 overflow-y-auto w-full max-w-5xl mx-auto">
-            {selectedProvince && selectedKodeProv ? (
-            <>
-                {/* Ringkasan Provinsi */}
-                {provinsiData ? (
-                <ProvinsiView provinsi={selectedProvince} data={provinsiData} />
+      {/* Atas: Map + Data */}
+      <Row>
+        {/* Kiri: Map */}
+        <Col md={7}>
+          <Card className="shadow-sm">
+            <Card.Header>
+              <h5 className="mb-0">Revitalisasi Sarana Belajar Mengajar</h5>
+              <small>Persebaran Program Revitalisasi Sekolah Nasional</small>
+            </Card.Header>
+            <Card.Body>
+              <MapContainer
+                center={[-2.5, 120]}
+                zoom={3.5}
+                minZoom={4}
+                maxZoom={8}
+                scrollWheelZoom={false}
+                style={{ width: "100%", height: "500px" }}
+              >
+                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                <GeoJSON data={indonesiaGeoJson as any} onEachFeature={onEachFeature} />
+              </MapContainer>
+            </Card.Body>
+          </Card>
+        </Col>
+
+        {/* Kanan: Info Nasional / Provinsi */}
+        <Col md={5}>
+          <Card className="shadow-sm h-100">
+            <Card.Header>
+              <h5 className="mb-0">
+                {selectedProvince ? `Data ${selectedProvince}` : "Data Nasional"}
+              </h5>
+            </Card.Header>
+            <Card.Body style={{ maxHeight: "500px", overflowY: "auto" }}>
+              {selectedProvince && selectedKodeProv ? (
+                provinsiData ? (
+                  <ProvinsiView provinsi={selectedProvince} data={provinsiData} />
                 ) : (
-                <p>Memuat data provinsi...</p>
-                )}
+                  <p>Memuat data provinsi...</p>
+                )
+              ) : nasionalData ? (
+                <NasionalView data={nasionalData} />
+              ) : (
+                <p>Memuat data nasional...</p>
+              )}
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
 
-                {/* Tabel Kabupaten/Kota */}
-                <div className="mt-6">
+      {/* Kedua: Tabel + Pie Chart */}
+      <Row className="mt-4">
+        {/* Kiri: Tabel */}
+        <Col md={7}>
+          <Card className="shadow-sm">
+            <Card.Header>
+              {selectedKodeProv && selectedKodeProv ? (
+                <h5 className="mb-0">Tabel Revitalisasi Sekolah Provinsi {selectedProvince}</h5>
+              ) : (
+                <h5 className="mb-0">Tabel Revitalisasi Sekolah Nasional</h5>
+              )}
+              
+              {/* <small>Persebaran Program Revitalisasi Sekolah Nasional</small> */}
+            </Card.Header>
+            <Card.Body>
+              {selectedProvince && selectedKodeProv ? (
                 <ProvinsiTableView
-                    kodeProvinsi={selectedKodeProv}
-                    namaProvinsi={selectedProvince}
+                  kodeProvinsi={selectedKodeProv}
+                  namaProvinsi={selectedProvince}
                 />
-                </div>
-            </>
-            ) : nasionalData ? (
-            <NasionalView data={nasionalData} />
-            ) : (
-            <p>Memuat data nasional...</p>
-            )}
-        </div>
-    </div>
+              ) : (
+                <NasionalTableView/>
+              )}
+            </Card.Body>  
+          </Card>
+        </Col>
+
+        {/* Kanan: Pie Chart */}
+        <Col md={5}>
+          <Card className="shadow-sm">
+            <Card.Header>
+              <h6 className="mb-0">
+                {selectedProvince ? `Anggaran Revitalisasi Sekolah Berdasarkan Bentuk Pendidikan ${selectedProvince}` : "Anggaran Revitalisasi Sekolah Berdasarkan Bentuk Pendidikan - Nasional"}
+              </h6>
+            </Card.Header>
+            <Card.Body style={{ maxHeight: "500px", overflowY: "auto" }}>
+              {selectedProvince && selectedKodeProv ? (
+                provinsiData ? (
+                  <AnggaranPieChart data={provinsiData} />
+                ) : (
+                  <p>Memuat data provinsi...</p>
+                )
+              ) : nasionalData ? (
+                <AnggaranPieChart data={nasionalData} />
+              ) : (
+                <p>Memuat data nasional...</p>
+              )}
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+
+      <Row className="mt-4">
+          <Card className="shadow-sm">
+            <Card.Header>
+              {selectedKodeProv && selectedKodeProv ? (
+                <h5 className="mb-0">Banyaknya Revitalisasi Sekolah berdasarkan Anggaran Revitalisasi Berdasarkan Provinsi {selectedProvince}</h5>
+              ) : (
+                <h5 className="mb-0">Banyaknya Revitalisasi Sekolah berdasarkan Anggaran Revitalisasi Berdasarkan Provinsi - Nasional</h5>
+              )}
+              
+            </Card.Header>
+            <Card.Body>
+              {selectedProvince && selectedKodeProv ? (
+                <RevitalisasiBarLineChartKab kode_pro={selectedKodeProv}/>
+              ) : (
+                <RevitalisasiBarLineChartProv/>
+              )}
+            </Card.Body>  
+          </Card>
+      </Row>
+
+    </Container>
   );
 };
 

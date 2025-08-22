@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
+import { Card, Table } from "react-bootstrap";
 import RevitalisasiBarLineChartKab from "./RevitalisasiBarLineChartKab";
 
 type RevitalisasiRow = {
@@ -10,7 +11,7 @@ type RevitalisasiRow = {
   jml_rev_smp: number;
   jml_rev_sma: number;
   total_jml_rev_sekolah: number;
-  anggaran_rev_paud: string;  // dari DB string
+  anggaran_rev_paud: string;
   anggaran_rev_sd: string;
   anggaran_rev_smp: string;
   anggaran_rev_sma: string;
@@ -53,62 +54,48 @@ const ProvinsiTableView = ({
   if (loading) return <p>Memuat data kabupaten...</p>;
 
   return (
-    <div className="overflow-x-auto bg-white p-4 rounded-lg shadow">
-      <h2 className="text-lg font-bold mb-4 text-red-600">
-        Tabel Revitalisasi Sekolah Prov {namaProvinsi}
-      </h2>
-
-      <table className="min-w-full border border-white text-sm text-white">
-        <thead className="bg-red-600 text-white">
-          <tr>
-            <th className="px-4 py-2 border">Kab / Kota</th>
-            <th className="px-4 py-2 border">PAUD</th>
-            <th className="px-4 py-2 border">SD</th>
-            <th className="px-4 py-2 border">SMP</th>
-            <th className="px-4 py-2 border">SMA</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((row, idx) => (
-            <tr key={idx} className="text-center">
-              <td className="px-4 py-2 border font-bold text-red-600">
-                {row.nama_wilayah}
-              </td>
-              <td className="px-4 py-2 border">
-                <div>Jml Sekolah: {row.jml_rev_paud}</div>
-                <div className="text-gray-600 text-xs">
-                  {formatRupiah(Number(row.anggaran_rev_paud))}
-                </div>
-              </td>
-              <td className="px-4 py-2 border">
-                <div>Jml Sekolah: {row.jml_rev_sd}</div>
-                <div className="text-gray-600 text-xs">
-                  {formatRupiah(Number(row.anggaran_rev_sd))}
-                </div>
-              </td>
-              <td className="px-4 py-2 border">
-                <div>Jml Sekolah: {row.jml_rev_smp}</div>
-                <div className="text-gray-600 text-xs">
-                  {formatRupiah(Number(row.anggaran_rev_smp))}
-                </div>
-              </td>
-              <td className="px-4 py-2 border">
-                <div>Jml Sekolah: {row.jml_rev_sma}</div>
-                <div className="text-gray-600 text-xs">
-                  {formatRupiah(Number(row.anggaran_rev_sma))}
-                </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <h2 className="text-lg font-bold mb-4 text-red-600 text-center">
-        Banyaknya Jumlah Revitalisasi Sekolah per Kab/Kota di Provinsi {namaProvinsi} [Grafik]
-        </h2>
-        <p>Silahkan Klik Bar setiap Kabupaten/Kota untuk melihat Detail Data per Jenjang!</p>
-      <RevitalisasiBarLineChartKab data={data} />
-    </div>
-  );
-};
+        <div style={{ maxHeight: "400px", overflowY: "auto" }}>
+          <Table striped bordered hover responsive>
+            <thead className="table sticky-top">
+              <tr>
+                <th>Kab / Kota</th>
+                <th>Jenjang</th>
+                <th>Banyak Sekolah Akan di Revitalisasi</th>
+                <th>Anggaran</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.map((row, idx) => (
+                <React.Fragment key={idx}>
+                  <tr>
+                    <td rowSpan={4} className="fw-bold align-middle">
+                      {row.nama_wilayah}
+                    </td>
+                    <td>PAUD</td>
+                    <td>{row.jml_rev_paud}</td>
+                    <td>{formatRupiah(Number(row.anggaran_rev_paud))}</td>
+                  </tr>
+                  <tr>
+                    <td>SD</td>
+                    <td>{row.jml_rev_sd}</td>
+                    <td>{formatRupiah(Number(row.anggaran_rev_sd))}</td>
+                  </tr>
+                  <tr>
+                    <td>SMP</td>
+                    <td>{row.jml_rev_smp}</td>
+                    <td>{formatRupiah(Number(row.anggaran_rev_smp))}</td>
+                  </tr>
+                  <tr>
+                    <td>SMA</td>
+                    <td>{row.jml_rev_sma}</td>
+                    <td>{formatRupiah(Number(row.anggaran_rev_sma))}</td>
+                  </tr>
+                </React.Fragment>
+              ))}
+            </tbody>
+          </Table>
+        </div>
+      
+)};
 
 export default ProvinsiTableView;

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ComposedChart,
   Bar,
@@ -11,26 +11,33 @@ import {
 } from "recharts";
 import RevitalisasiDetailProv from "./RevitalisasiDetailProv.tsx";
 
-type ProvinsiRow = {
-  kode_pro: string;
-  nama_provinsi: string;
-  total_sekolah: number;
-  total_anggaran: number;
-};
-
-const RevitalisasiBarLineChartProv = ({ data }: { data: ProvinsiRow[] }) => {
+const RevitalisasiBarLineChartProv = () => {
   const [selectedProv, setSelectedProv] = useState<string | null>(null);
   const [detailData, setDetailData] = useState<any[]>([]);
+  const [dataProv, setDataProv] = useState<any[]>([]);
 
-  if (!data || data.length === 0) return <p>Data tidak tersedia</p>;
+  useEffect(() => {
+      const fetchDataProv = async () => {
+        try {
+          const res = await fetch("http://localhost:5000/api/provinsi");
+          const data = await res.json();
+          setDataProv(data);
+        } catch (err) {
+          console.error("Gagal fetch nasional:", err);
+        }
+      };
+      fetchDataProv();
+    }, []);
+
+  if (!dataProv || dataProv.length === 0) return <p>Data tidak tersedia</p>;
 
   // Hitung total semua anggaran untuk % anggaran
-  const total_anggaran = data.reduce(
+  const total_anggaran = dataProv.reduce(
     (sum, d) => sum + Number(d.total_anggaran),
     0
   );
 
-  const chartData = data.map((d) => ({
+  const chartData = dataProv.map((d) => ({
     kode_pro: d.kode_pro,
     nama_wilayah: d.nama_provinsi,
     jumlah: d.total_sekolah,
@@ -78,10 +85,10 @@ const RevitalisasiBarLineChartProv = ({ data }: { data: ProvinsiRow[] }) => {
   return (
     <div className="w-full bg-white p-4 rounded-lg shadow">
       <ComposedChart
-        width={800}
-        height={400}
+        width={1400}
+        height={500}
         data={chartData}
-        margin={{ top: 20, right: 30, left: 20, bottom: 80 }}
+        margin={{ top: 20, right: 30, left: 20, bottom: 110 }}
         barCategoryGap="50%"
         barGap={5}
       >
@@ -96,7 +103,17 @@ const RevitalisasiBarLineChartProv = ({ data }: { data: ProvinsiRow[] }) => {
         <YAxis yAxisId="left" />
         <YAxis yAxisId="right" orientation="right" />
         <Tooltip />
-        <Legend />
+        <Legend
+          layout="horizontal"
+          verticalAlign="top"
+          align="center"
+          formatter={(value, entry) => {
+            if (value === "jumlah") return "Jumlah Sekolah";
+            if (value === "persen") return "Persentase Anggaran";
+            return value;
+          }}
+        />
+
 
         <Bar
           yAxisId="left"
@@ -117,7 +134,7 @@ const RevitalisasiBarLineChartProv = ({ data }: { data: ProvinsiRow[] }) => {
       </ComposedChart>
 
       {selectedProv && detailData.length > 0 && (
-        <div className="mt-10">
+        <div className="mt-5">
           <h3 className="text-center font-bold text-red-600 text-lg mb-4">
             Detail Revitalisasi per Jenjang Provinsi {selectedProv}
           </h3>

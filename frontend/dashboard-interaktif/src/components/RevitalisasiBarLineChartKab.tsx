@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ComposedChart,
   Bar,
@@ -11,14 +11,14 @@ import {
 } from "recharts";
 import RevitalisasiDetailKab from "./RevitalisasiDetailKab";
 
-type DataRow = {
-  kode_pro: string;
-  kode_kab: string;
-  nama_wilayah: string;
-  total_jml_rev_sekolah: number;
-  persen: number;
-  total_anggaran_rev: number;
-};
+// type DataRow = {
+//   kode_pro: string;
+//   kode_kab: string;
+//   nama_wilayah: string;
+//   total_jml_rev_sekolah: number;
+//   persen: number;
+//   total_anggaran_rev: number;
+// };
 
 type DetailJenjang = {
   jenjang: string;
@@ -26,10 +26,26 @@ type DetailJenjang = {
   total_anggaran_rev: number;
 };
 
-const RevitalisasiBarLineChartKab = ({ data }: { data: DataRow[] }) => {
+type Props = { kode_pro: string }
+
+const RevitalisasiBarLineChartKab = ({ kode_pro }: Props) => {
   const [selectedKab, setSelectedKab] = useState<string | null>(null);
   const [detailData, setDetailData] = useState<DetailJenjang[]>([]);
+  const [dataKab, setDataKab] = useState<any[]>([]);
 
+    useEffect(() => {
+        const fetchDataKab = async () => {
+          try {
+            const res = await fetch(`http://localhost:5000/api/kabupaten/${kode_pro}`);
+            const data = await res.json();
+            setDataKab(data);
+          } catch (err) {
+            console.error("Gagal fetch kab:", err);
+          }
+        };
+        fetchDataKab();
+      }, [kode_pro]);
+      
   // klik bar kabupaten
   const handleBarClick = async (d: any) => {
     setSelectedKab(d.nama_wilayah);
@@ -70,15 +86,15 @@ const RevitalisasiBarLineChartKab = ({ data }: { data: DataRow[] }) => {
     }
   };
 
-  if (!data || data.length === 0) return <p>Data tidak tersedia</p>;
+  if (!dataKab || dataKab.length === 0) return <p>Data tidak tersedia</p>;
 
   // Hitung total semua anggaran revitalisasi untuk dapatkan persentase
-  const total_anggaran = data.reduce(
+  const total_anggaran = dataKab.reduce(
     (sum, d) => sum + Number(d.total_anggaran_rev),
     0
   );
 
-  const chartData = data.map((d) => ({
+  const chartData = dataKab.map((d) => ({
     kode_pro: d.kode_pro,
     kode_kab: d.kode_kab,
     nama_wilayah: d.nama_wilayah,
@@ -87,12 +103,13 @@ const RevitalisasiBarLineChartKab = ({ data }: { data: DataRow[] }) => {
   }));
 
   return (
-    <div className="w-full h-auto bg-white p-4 rounded-lg shadow">
+    <div className="w-full bg-white p-4 rounded-lg shadow">
+      <div className="d-flex justify-content-center">
       <ComposedChart
-        width={800}
-        height={400}
+        width={1000}
+        height={500}
         data={chartData}
-        margin={{ top: 20, right: 30, left: 20, bottom: 80 }}
+        margin={{ top: 20, right: 30, left: 30, bottom: 110 }}
       >
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis
@@ -105,13 +122,22 @@ const RevitalisasiBarLineChartKab = ({ data }: { data: DataRow[] }) => {
         <YAxis yAxisId="left" />
         <YAxis yAxisId="right" orientation="right" />
         <Tooltip />
-        <Legend />
+        <Legend
+          layout="horizontal"
+          verticalAlign="top"
+          align="center"
+          formatter={(value, entry) => {
+            if (value === "jumlah") return "Jumlah Sekolah";
+            if (value === "persen") return "Persentase Anggaran";
+            return value;
+          }}
+        />
 
         <Bar
           yAxisId="left"
           dataKey="jumlah_sekolah"
           fill="#ff9900"
-          barSize={30}
+          barSize={40}
           onClick={handleBarClick}
         />
         <Line
@@ -125,7 +151,7 @@ const RevitalisasiBarLineChartKab = ({ data }: { data: DataRow[] }) => {
         />
       </ComposedChart>
 
-      {/* Tampilkan detail jika kabupaten diklik */}
+      </div>
       {selectedKab && (
         <RevitalisasiDetailKab data={detailData} namaKab={selectedKab} />
       )}

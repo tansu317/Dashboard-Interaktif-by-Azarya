@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
-import { Card, CardContent } from "../components/Card";
 import AnggaranPieChart from "./AnggaranPieChart";
 import RevitalisasiBarLineChart from "./RevitalisasiBarLineChartProv";
-import DashboardKPI from "./DashboardKPI";
 
 type NasionalData = {
   total_paud: number;
@@ -31,21 +29,21 @@ const formatRupiah = (num: number) => {
 };
 
 const NasionalView = ({ data }: { data: NasionalData }) => {
-    const [provinsiData, setProvinsiData] = useState<ProvinsiRow[]>([]);
-    const [loading, setLoading] = useState(true);
+  const [provinsiData, setProvinsiData] = useState<ProvinsiRow[]>([]);
+  const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        fetch("http://localhost:5000/api/provinsi")
-        .then((res) => res.json())
-        .then((result) => {
-            setProvinsiData(result);
-            setLoading(false);
-        })
-        .catch((err) => {
-            console.error("Error ambil data provinsi:", err);
-            setLoading(false);
-        });
-    }, []);
+  useEffect(() => {
+    fetch("http://localhost:5000/api/provinsi")
+      .then((res) => res.json())
+      .then((result) => {
+        setProvinsiData(result);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error ambil data provinsi:", err);
+        setLoading(false);
+      });
+  }, []);
 
   const items = [
     { label: "Total Revitalisasi Sekolah", value: data.total_sekolah.toLocaleString("id-ID") },
@@ -61,31 +59,23 @@ const NasionalView = ({ data }: { data: NasionalData }) => {
   ];
 
   return (
-    <div className="">   
-    <h2>Nasional - Indonesia</h2>
-      {items.map((item, idx) => (
-        <Card key={idx} className="shadow-md rounded-xl">
-          <CardContent>
-            <p className="text-gray-500 text-sm">{item.label}</p>
-            <h2 className="text-xl font-bold">{item.value}</h2>
-          </CardContent>
-        </Card>
-      ))}
-      <div className="mt-6">
-        <h2>Anggaran Revitalisasi Sekolah Berdasarkan Bentuk Pendidikan - Nasional</h2>
-        <AnggaranPieChart data={data} />
-      </div>
+      <div className="container my-4">
+        <h4 className="mb-5 fw-bold text-center">Nasional - Indonesia</h4>
 
-      {provinsiData.length > 0 && (
-        <div className="mt-10">
-          <h2 className="font-bold text-lg mb-2 text-red-600 text-center">
-            Banyaknya Revitalisasi Sekolah berdasarkan Anggaran Revitalisasi Berdasarkan Provinsi
-          </h2>
-          <p>Silahkan Klik Bar setiap Provinsi untuk melihat Detail Data per Jenjang! (Bonus Project)</p>
-          <RevitalisasiBarLineChart data={provinsiData} />
+        {/* Card Grid */}
+        <div className="row g-3">
+          {items.map((item, idx) => (
+            <div className="col-md-6" key={idx}>
+              <div className="card shadow-sm h-100">
+                <div className="card-body text-center">
+                  <p className="text-muted small mb-1">{item.label}</p>
+                  <h5 className="fw-bold">{item.value}</h5>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
-      )}
-    </div>
+      </div>
   );
 };
 
